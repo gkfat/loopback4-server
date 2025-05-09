@@ -1,9 +1,4 @@
 {
-  "editor.rulers": [80],
-  "editor.tabCompletion": "on",
-  "editor.tabSize": 2,
-  "editor.trimAutoWhitespace": true,
-
   "eslint.codeActionsOnSave.mode": "all",
   "files.eol": "\n",
   "editor.insertSpaces": true,
@@ -14,25 +9,4 @@
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "eslint.format.enable": true,
   "editor.formatOnSave": true,
-
-  "files.exclude": {
-    "**/.DS_Store": true,
-    "**/.git": true,
-    "**/.hg": true,
-    "**/.svn": true,
-    "**/CVS": true,
-    "dist": true,
-  },
-  "files.insertFinalNewline": true,
-  "files.trimTrailingWhitespace": true,
-
-  "typescript.tsdk": "./node_modules/typescript/lib",
-  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
-  "typescript.preferences.quoteStyle": "single",
-  "eslint.run": "onSave",
-  "eslint.nodePath": "./node_modules",
-  "eslint.validate": [
-    "javascript",
-    "typescript"
-  ]
 }
