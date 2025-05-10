@@ -20,14 +20,14 @@ export class Todo extends Entity {
       super(data);
     }
 
-    @property({ id: true, generated: true })
+    @property({ type: 'number', id: true, generated: true })
     id: number;
 
-    @property({ required: true })
+    @property({ type: 'string', required: true })
     title: string;
 
-    @property()
-    subtitle?: string;
+    @property({ type: 'string' })
+    subtitle: string | null;
 
     @property({
       type: 'string',
@@ -39,11 +39,11 @@ export class Todo extends Entity {
     status: TodoStatus;
 
     @property({type: 'date', defaultFn: 'now'})
-    created_at: Date;
+    createdAt: Date;
 
     // Todo is soft delete
-    @property({type: 'date'})
-    deleted_at: Date;
+    @property({ type: 'date' })
+    deletedAt: Date | null;
 
     @hasMany(() => Item)
     items: Item[];

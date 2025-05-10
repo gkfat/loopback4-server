@@ -1,10 +1,3 @@
-import { MysqlDataSource } from 'src/datasources/mysql.datasource';
-import { Item } from 'src/models/item.model';
-import {
-  Todo,
-  TodoRelations,
-} from 'src/models/todo.model';
-
 import {
   Getter,
   inject,
@@ -15,6 +8,12 @@ import {
   repository,
 } from '@loopback/repository';
 
+import { MysqlDataSource } from '../datasources/mysql.datasource';
+import { Item } from '../models/item.model';
+import {
+  Todo,
+  TodoRelations,
+} from '../models/todo.model';
 import { ItemRepository } from './item.repository';
 
 export class TodoRepository extends DefaultCrudRepository<

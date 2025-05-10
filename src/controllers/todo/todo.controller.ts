@@ -1,14 +1,8 @@
-import {
-  Todo,
-  TodoStatus,
-} from 'src/models/todo.model';
-import { TodoService } from 'src/services/todo.service';
-
+import { inject } from '@loopback/core';
 import {
   api,
   del,
   get,
-  getModelSchemaRef,
   param,
   patch,
   post,
@@ -16,30 +10,29 @@ import {
   response,
 } from '@loopback/rest';
 
+import { TodoStatus } from '../../models/todo.model';
+import { TodoService } from '../../services/todo.service';
+import { buildSchema } from '../../utils/schema';
 import {
-  CreateTodoSchema,
-  UpdateTodoSchema,
+  CreateTodoRequestSchema,
+  CreateTodoResponseSchema,
+  DeleteTodoResponseSchema,
+  GetTodoByIdResponseSchema,
+  GetTodosResponseSchema,
+  UpdateTodoRequestSchema,
+  UpdateTodoResponseSchema,
 } from './todo.schema';
 
 @api({ basePath: '/todos' })
 export class TodoController {
   constructor(
+    @inject('services.TodoService')
     private readonly todoService: TodoService,
   ) {}
 
   // 取得所有 Todo
   @get('/')
-  @response(200, {
-    description: 'list all todos',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'array',
-          items: getModelSchemaRef(Todo, {includeRelations: true}),
-        },
-      },
-    },
-  })
+  @response(200, buildSchema(GetTodosResponseSchema))
   async list(
     @param.query.string('title') title?: string,
     @param.query.number('page') page: number = 0,
@@ -51,39 +44,31 @@ export class TodoController {
       pageSize
     };
 
-    return this.todoService.list(reqBody);
+    const result = await this.todoService.list(reqBody);
+
+    return {
+      result
+    }
   }
 
   // 依 Id 取得 Todo
   @get('/{id}')
-  @response(200, {
-    description: 'get todo by id',
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(Todo, {includeRelations: true}),
-      },
-    },
-  })
+  @response(200, buildSchema(GetTodoByIdResponseSchema))
   async findById(
     @param.path.number('id') id: number,
   ) {
-    return this.todoService.findById(id);
+    const result = await this.todoService.findById(id)
+
+    return {
+      result
+    }
   }
 
   // 新增 Todo
   @post('/create')
-  @response(200, {
-    description: 'create todo',
-    content: {'application/json': {schema: getModelSchemaRef(Todo)}},
-  })
+  @response(200, buildSchema(CreateTodoResponseSchema))
   async create(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: CreateTodoSchema
-        },
-      },
-    })
+    @requestBody(buildSchema(CreateTodoRequestSchema))
     payload: {
       title: string;
       subtitle?: string;
@@ -92,45 +77,44 @@ export class TodoController {
       }[];
     }
   ) {
-    return this.todoService.create(payload);
+    const result = await this.todoService.create(payload);
+
+    return {
+      result
+    }
   }
 
   // 更新 Todo
   @patch('/{id}')
-  @response(200, {
-    description: 'update todo',
-    content: {'application/json': {schema: getModelSchemaRef(Todo)}},
-  })
+  @response(200, buildSchema(UpdateTodoResponseSchema))
   async update(
     @param.path.number('id') id: number,
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: UpdateTodoSchema
-        },
-      },
-    })
+    @requestBody(buildSchema(UpdateTodoRequestSchema))
     payload: {
       title?: string;
       subtitle?: string;
       status?: Exclude<TodoStatus, TodoStatus.DELETED>;
     }
   ) {
-    return await this.todoService.update({
+    const result = await this.todoService.update({
       id,
       ...payload
     });
+
+    return {
+      result,
+    }
   }
 
   // 刪除 Todo
   @del('/{id}')
-  @response(200, {
-    description: 'delete todo',
-    content: {'application/json': {schema: Number}},
-  })
+  @response(200, buildSchema(DeleteTodoResponseSchema))
   async delete(@param.path.number('id') id: number) {
-    const res = await this.todoService.deleteById(id);
+    const result = await this.todoService.deleteById(id);
 
-    return res;
+    return {
+      result
+    };
   }
 }
+

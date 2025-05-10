@@ -21,16 +21,16 @@ export class Item extends Entity {
   content: string;
 
   @property({required: true})
-  is_completed: boolean;
+  isCompleted: boolean;
 
   @property({ type: 'date' })
-  completed_at?: Date;
+  completedAt: Date | null;
 
   @property({ type: 'date', defaultFn: 'now' })
-  created_at: Date;
+  createdAt: Date;
 
   @belongsTo(() => Todo)
-  todo_id: number;
+  todoId: number;
 }
 
 export interface ItemRelations {

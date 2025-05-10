@@ -1,8 +1,32 @@
-import { TodoStatus } from 'src/models/todo.model';
+import {
+  getModelSchemaRef,
+  SchemaObject,
+} from '@loopback/rest';
 
-import { SchemaObject } from '@loopback/rest';
+import { TodoDto } from '../../dto/todo.dto';
+import { TodoStatus } from '../../models/todo.model';
 
-export const CreateTodoSchema: SchemaObject = {
+export const GetTodosResponseSchema: SchemaObject = {
+    type: 'object',
+    properties: {
+        result: {
+            type: 'array',
+            items: getModelSchemaRef(TodoDto, { includeRelations: true })
+        }
+    }
+}
+
+export const GetTodoByIdResponseSchema: SchemaObject = {
+    type: 'object',
+    properties: {
+        result: {
+            ...getModelSchemaRef(TodoDto, { includeRelations: true}),
+            nullable: true
+        }
+    }
+}
+
+export const CreateTodoRequestSchema: SchemaObject = {
     type: 'object',
     required: ['title'],
     properties: {
@@ -27,7 +51,14 @@ export const CreateTodoSchema: SchemaObject = {
     }
 }
 
-export const UpdateTodoSchema: SchemaObject = {
+export const CreateTodoResponseSchema: SchemaObject = {
+    type: 'object',
+    properties: {
+        result: getModelSchemaRef(TodoDto, { includeRelations: true })
+    }
+}
+
+export const UpdateTodoRequestSchema: SchemaObject = {
     type: 'object',
     properties: {
         title: {
@@ -39,6 +70,22 @@ export const UpdateTodoSchema: SchemaObject = {
         status: {
             type: 'string',
             enum: [TodoStatus.ACTIVE, TodoStatus.INACTIVE]
+        }
+    }
+}
+
+export const UpdateTodoResponseSchema: SchemaObject = {
+    type: 'object',
+    properties: {
+        result: getModelSchemaRef(TodoDto, { includeRelations: true })
+    }
+}
+
+export const DeleteTodoResponseSchema: SchemaObject = {
+    type: 'object',
+    properties: {
+        result: {
+            type: 'number'
         }
     }
 }

@@ -1,10 +1,4 @@
 import {
-  Todo,
-  TodoRelations,
-  TodoStatus,
-} from 'src/models/todo.model';
-
-import {
   BindingScope,
   injectable,
 } from '@loopback/core';
@@ -14,6 +8,11 @@ import {
 } from '@loopback/repository';
 import { HttpErrors } from '@loopback/rest';
 
+import { toTodoDto } from '../dto/todo.dto';
+import {
+  Todo,
+  TodoStatus,
+} from '../models/todo.model';
 import {
   ItemRepository,
   TodoRepository,
@@ -33,7 +32,7 @@ export class TodoService {
     /** 分頁 0 base */
     page: number;
     pageSize: number;
-  }): Promise<(Todo & TodoRelations)[]> {
+  }) {
     const {
       title,
       page,
@@ -49,7 +48,9 @@ export class TodoService {
             ? { title: { like: `%${title}%` } }
             : {}
         ),
-        deleted_at: null
+        deletedAt: {
+          eq: null
+        }
       },
       limit: pageSize,
       skip,
@@ -58,21 +59,23 @@ export class TodoService {
 
     const res = await this.todoRepo.find(filter);
     
-    return res;
+    return res.map(toTodoDto);
   }
 
-  async findById(id: number): Promise<Todo & TodoRelations> {
+  async findById(id: number) {
     const filter: Filter<Todo> = {
       where: {
         id,
-        deleted_at: null,
+        deletedAt: {
+          eq: null
+        }
       },
       include: [{ relation: 'items' }],
     }
 
     const res = await this.todoRepo.findOne(filter);
 
-    return res;
+    return res ? toTodoDto(res) : null;
   }
 
   async create(reqBody: {
@@ -81,20 +84,22 @@ export class TodoService {
     items?: {
       content: string;
     }[];
-  }): Promise<Todo> {
-    const newItems = reqBody.items?.map((item) => ({
-      content: item.content,
-      is_completed: false,
-      completed_at: null,
-      todo_id: newTodo.id,
-    })) ?? []
-
+  }) {
     const newTodo = await this.todoRepo.create({
       title: reqBody.title,
       subtitle: reqBody.subtitle,
       status: TodoStatus.ACTIVE,
-      items: newItems
     });
+
+    if (reqBody.items?.length) {
+      await Promise.all(
+        reqBody.items?.map((item) => this.todoRepo.items(newTodo.id).create({
+            content: item.content,
+            isCompleted: false,
+            todoId: newTodo.id,
+        }))
+      )
+    }
 
     return this.findById(newTodo.id)
   }
@@ -104,7 +109,7 @@ export class TodoService {
       title?: string;
       subtitle?: string;
       status?: Exclude<TodoStatus, TodoStatus.DELETED>;
-  }): Promise<Todo & TodoRelations> {
+  }) {
     const {
       id,
       title,
@@ -115,7 +120,9 @@ export class TodoService {
     const findTodo = await this.todoRepo.findOne({
       where: {
         id,
-        deleted_at: null,
+        deletedAt: {
+          eq: null
+        }
       }
     })
 
@@ -140,11 +147,13 @@ export class TodoService {
     return this.findById(id);
   }
 
-  async deleteById(id: number): Promise<number> {
+  async deleteById(id: number) {
     const findTodo = await this.todoRepo.findOne({
       where: {
         id,
-        deleted_at: null,
+        deletedAt: {
+          eq: null
+        }
       }
     })
 
@@ -152,7 +161,7 @@ export class TodoService {
       throw new HttpErrors.NotFound(`Todo ${id} not found`)
     }
 
-    findTodo.deleted_at = new Date()
+    findTodo.deletedAt = new Date()
     findTodo.status = TodoStatus.DELETED;
 
     await this.todoRepo.save(findTodo)
