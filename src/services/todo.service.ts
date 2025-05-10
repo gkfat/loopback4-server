@@ -13,23 +13,18 @@ import {
   Todo,
   TodoStatus,
 } from '../models/todo.model';
-import {
-  ItemRepository,
-  TodoRepository,
-} from '../repositories';
+import { TodoRepository } from '../repositories';
+import { isDefined } from '../utils/common';
 
 @injectable({scope: BindingScope.TRANSIENT})
 export class TodoService {
   constructor(
     @repository(TodoRepository)
     private todoRepo: TodoRepository,
-    @repository(ItemRepository)
-    private itemRepo: ItemRepository,
   ) {}
 
   async list(reqBody: {
     title?: string;
-    /** 分頁 0 base */
     page: number;
     pageSize: number;
   }) {
@@ -65,7 +60,6 @@ export class TodoService {
   async findById(id: number) {
     const filter: Filter<Todo> = {
       where: {
-        id,
         deletedAt: {
           eq: null
         }
@@ -73,7 +67,7 @@ export class TodoService {
       include: [{ relation: 'items' }],
     }
 
-    const res = await this.todoRepo.findOne(filter);
+    const res = await this.todoRepo.findById(id, filter);
 
     return res ? toTodoDto(res) : null;
   }
@@ -83,19 +77,26 @@ export class TodoService {
     subtitle?: string;
     items?: {
       content: string;
+      isCompleted: boolean;
     }[];
   }) {
+    const {
+      title,
+      subtitle,
+      items,
+    } = reqBody;
+
     const newTodo = await this.todoRepo.create({
-      title: reqBody.title,
-      subtitle: reqBody.subtitle,
+      title,
+      subtitle,
       status: TodoStatus.ACTIVE,
     });
 
-    if (reqBody.items?.length) {
+    if (items?.length) {
       await Promise.all(
-        reqBody.items?.map((item) => this.todoRepo.items(newTodo.id).create({
+        items?.map((item) => this.todoRepo.items(newTodo.id).create({
             content: item.content,
-            isCompleted: false,
+            isCompleted: item.isCompleted,
             todoId: newTodo.id,
         }))
       )
@@ -130,15 +131,15 @@ export class TodoService {
       throw new HttpErrors.NotFound(`Todo ${id} not found`)
     }
 
-    if (title) {
+    if (isDefined(title)) {
       findTodo.title = title;
     }
 
-    if (subtitle) {
+    if (isDefined(subtitle)) {
       findTodo.subtitle = subtitle;
     }
 
-    if (status) {
+    if (isDefined(status)) {
       findTodo.status = status;
     }
 

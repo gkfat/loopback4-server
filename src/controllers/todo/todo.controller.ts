@@ -18,7 +18,8 @@ import {
   CreateTodoResponseSchema,
   DeleteTodoResponseSchema,
   GetTodoByIdResponseSchema,
-  GetTodosResponseSchema,
+  SearchTodosRequestSchema,
+  SearchTodosResponseSchema,
   UpdateTodoRequestSchema,
   UpdateTodoResponseSchema,
 } from './todo.schema';
@@ -31,17 +32,20 @@ export class TodoController {
   ) {}
 
   // 取得所有 Todo
-  @get('/')
-  @response(200, buildSchema(GetTodosResponseSchema))
+  @post('/search')
+  @response(200, buildSchema(SearchTodosResponseSchema))
   async list(
-    @param.query.string('title') title?: string,
-    @param.query.number('page') page: number = 0,
-    @param.query.number('pageSize') pageSize: number = 10,
+    @requestBody(buildSchema(SearchTodosRequestSchema))
+    payload: {
+      title: string;
+      page?: number;
+      pageSize?: number;
+    }
   ) {
     const reqBody = {
-      title,
-      page,
-      pageSize
+      title: payload.title,
+      page: payload.page ?? 0,
+      pageSize: payload.pageSize ?? 10
     };
 
     const result = await this.todoService.list(reqBody);
@@ -74,6 +78,7 @@ export class TodoController {
       subtitle?: string;
       items?: {
         content: string;
+        isCompleted: boolean;
       }[];
     }
   ) {

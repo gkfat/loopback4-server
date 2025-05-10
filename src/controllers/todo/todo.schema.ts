@@ -6,7 +6,27 @@ import {
 import { TodoDto } from '../../dto/todo.dto';
 import { TodoStatus } from '../../models/todo.model';
 
-export const GetTodosResponseSchema: SchemaObject = {
+export const SearchTodosRequestSchema: SchemaObject = {
+    type: 'object',
+    properties: {
+        title: {
+            type: 'string',
+            description: 'Fuzzy search todo title',
+        },
+        page: {
+            type: 'number',
+            description: 'Page(start from 0)',
+            default: 0
+        },
+        pageSize: {
+            type: 'number',
+            description: 'Page size',
+            default: 10
+        }
+    }
+}
+
+export const SearchTodosResponseSchema: SchemaObject = {
     type: 'object',
     properties: {
         result: {
@@ -31,19 +51,27 @@ export const CreateTodoRequestSchema: SchemaObject = {
     required: ['title'],
     properties: {
         title: {
-            type: 'string'
+            type: 'string',
+            description: 'Todo title'
         },
         subtitle: {
-            type: 'string'
+            type: 'string',
+            description: 'Todo subtitle'
         },
         items: {
             type: 'array',
+            description: 'Items belong to this todo',
             items: {
                 type: 'object',
-                required: ['content'],
+                required: ['content', 'isCompleted'],
                 properties: {
                     content: {
-                        type: 'string'
+                        type: 'string',
+                        description: 'Item content'
+                    },
+                    isCompleted: {
+                        type: 'boolean',
+                        description: 'Item complete status'
                     }
                 }
             }

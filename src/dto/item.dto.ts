@@ -7,7 +7,7 @@ import { Item } from '../models/item.model';
 
 @model()
 export class ItemDto {
-  @property({ type: 'number' })
+  @property({ type: 'number', description: 'Unique item id' })
   id: number;
 
   @property({ type: 'string' })
