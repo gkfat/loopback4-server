@@ -8,17 +8,14 @@
     "node": ">= 20"
   },
   "scripts": {
+    "dev": "pnpm build && pnpm start",
     "build": "lb-tsc",
     "build:watch": "lb-tsc --watch",
-    "lint": "npm run eslint && npm run prettier:check",
-    "lint:fix": "npm run eslint:fix && npm run prettier:fix",
-    "eslint": "lb-eslint --report-unused-disable-directives .",
-    "eslint:fix": "npm run eslint -- --fix",
     "test": "lb-mocha --allow-console-logs \"dist/__tests__\"",
     "docker:build": "docker build -t loopback-4-app .",
     "docker:run": "docker run -p 3000:3000 -d loopback-4-app",
     "migrate": "node ./dist/migrate",
-    "start": "node -r source-map-support/register .",
+    "start": "node -r source-map-support/register dist/index.js",
     "clean": "lb-clean dist *.tsbuildinfo .eslintcache"
   },
   "dependencies": {
@@ -29,6 +26,7 @@
     "@loopback/rest-explorer": "^7.0.13",
     "@loopback/service-proxy": "^7.0.13",
     "dotenv": "^16.5.0",
+    "loopback-connector-mysql": "^7.1.2",
     "mysql": "^2.18.1",
     "tslib": "^2.8.1"
   },
