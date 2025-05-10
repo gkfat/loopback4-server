@@ -1,10 +1,10 @@
 import {
-  getModelSchemaRef,
-  SchemaObject,
+    getModelSchemaRef,
+    SchemaObject,
 } from '@loopback/rest';
 
-import { TodoDto } from '../../dto/todo.dto';
-import { TodoStatus } from '../../models/todo.model';
+import { TodoDto } from '../../dto';
+import { TodoStatus } from '../../enums';
 
 export const SearchTodosRequestSchema: SchemaObject = {
     type: 'object',
@@ -16,35 +16,35 @@ export const SearchTodosRequestSchema: SchemaObject = {
         page: {
             type: 'number',
             description: 'Page(start from 0)',
-            default: 0
+            default: 0,
         },
         pageSize: {
             type: 'number',
             description: 'Page size',
-            default: 10
-        }
-    }
-}
+            default: 10,
+        },
+    },
+};
 
 export const SearchTodosResponseSchema: SchemaObject = {
     type: 'object',
     properties: {
         result: {
             type: 'array',
-            items: getModelSchemaRef(TodoDto, { includeRelations: true })
-        }
-    }
-}
+            items: getModelSchemaRef(TodoDto, { includeRelations: true }),
+        },
+    },
+};
 
 export const GetTodoByIdResponseSchema: SchemaObject = {
     type: 'object',
     properties: {
         result: {
-            ...getModelSchemaRef(TodoDto, { includeRelations: true}),
-            nullable: true
-        }
-    }
-}
+            ...getModelSchemaRef(TodoDto, { includeRelations: true }),
+            nullable: true,
+        },
+    },
+};
 
 export const CreateTodoRequestSchema: SchemaObject = {
     type: 'object',
@@ -52,11 +52,11 @@ export const CreateTodoRequestSchema: SchemaObject = {
     properties: {
         title: {
             type: 'string',
-            description: 'Todo title'
+            description: 'Todo title',
         },
         subtitle: {
             type: 'string',
-            description: 'Todo subtitle'
+            description: 'Todo subtitle',
         },
         items: {
             type: 'array',
@@ -67,53 +67,41 @@ export const CreateTodoRequestSchema: SchemaObject = {
                 properties: {
                     content: {
                         type: 'string',
-                        description: 'Item content'
+                        description: 'Item content',
                     },
                     isCompleted: {
                         type: 'boolean',
-                        description: 'Item complete status'
-                    }
-                }
-            }
-        }
-    }
-}
+                        description: 'Item complete status',
+                    },
+                },
+            },
+        },
+    },
+};
 
 export const CreateTodoResponseSchema: SchemaObject = {
     type: 'object',
-    properties: {
-        result: getModelSchemaRef(TodoDto, { includeRelations: true })
-    }
-}
+    properties: { result: getModelSchemaRef(TodoDto, { includeRelations: true }) },
+};
 
 export const UpdateTodoRequestSchema: SchemaObject = {
     type: 'object',
     properties: {
-        title: {
-            type: 'string'
-        },
-        subtitle: {
-            type: 'string'
-        },
+        title: { type: 'string' },
+        subtitle: { type: 'string' },
         status: {
             type: 'string',
-            enum: [TodoStatus.ACTIVE, TodoStatus.INACTIVE]
-        }
-    }
-}
+            enum: [TodoStatus.ACTIVE, TodoStatus.INACTIVE],
+        },
+    },
+};
 
 export const UpdateTodoResponseSchema: SchemaObject = {
     type: 'object',
-    properties: {
-        result: getModelSchemaRef(TodoDto, { includeRelations: true })
-    }
-}
+    properties: { result: getModelSchemaRef(TodoDto, { includeRelations: true }) },
+};
 
 export const DeleteTodoResponseSchema: SchemaObject = {
     type: 'object',
-    properties: {
-        result: {
-            type: 'number'
-        }
-    }
-}
+    properties: { result: { type: 'number' } },
+};

@@ -1,59 +1,57 @@
 import { inject } from '@loopback/core';
 import {
-  api,
-  del,
-  get,
-  param,
-  patch,
-  post,
-  requestBody,
-  response,
+    api,
+    del,
+    get,
+    param,
+    patch,
+    post,
+    requestBody,
+    response,
 } from '@loopback/rest';
 
-import { TodoStatus } from '../../models/todo.model';
+import { TodoStatus } from '../../enums';
 import { TodoService } from '../../services/todo.service';
 import { buildSchema } from '../../utils/schema';
 import {
-  CreateTodoRequestSchema,
-  CreateTodoResponseSchema,
-  DeleteTodoResponseSchema,
-  GetTodoByIdResponseSchema,
-  SearchTodosRequestSchema,
-  SearchTodosResponseSchema,
-  UpdateTodoRequestSchema,
-  UpdateTodoResponseSchema,
+    CreateTodoRequestSchema,
+    CreateTodoResponseSchema,
+    DeleteTodoResponseSchema,
+    GetTodoByIdResponseSchema,
+    SearchTodosRequestSchema,
+    SearchTodosResponseSchema,
+    UpdateTodoRequestSchema,
+    UpdateTodoResponseSchema,
 } from './todo.schema';
 
 @api({ basePath: '/todos' })
 export class TodoController {
-  constructor(
+    constructor(
     @inject('services.TodoService')
     private readonly todoService: TodoService,
-  ) {}
+    ) {}
 
   // 取得所有 Todo
   @post('/search')
   @response(200, buildSchema(SearchTodosResponseSchema))
-  async list(
+    async list(
     @requestBody(buildSchema(SearchTodosRequestSchema))
-    payload: {
+        payload: {
       title: string;
       page?: number;
       pageSize?: number;
     }
-  ) {
-    const reqBody = {
-      title: payload.title,
-      page: payload.page ?? 0,
-      pageSize: payload.pageSize ?? 10
-    };
+    ) {
+        const reqBody = {
+            title: payload.title,
+            page: payload.page ?? 0,
+            pageSize: payload.pageSize ?? 10,
+        };
 
-    const result = await this.todoService.list(reqBody);
+        const result = await this.todoService.list(reqBody);
 
-    return {
-      result
+        return { result };
     }
-  }
 
   // 依 Id 取得 Todo
   @get('/{id}')
@@ -61,11 +59,9 @@ export class TodoController {
   async findById(
     @param.path.number('id') id: number,
   ) {
-    const result = await this.todoService.findById(id)
+      const result = await this.todoService.findById(id);
 
-    return {
-      result
-    }
+      return { result };
   }
 
   // 新增 Todo
@@ -73,7 +69,7 @@ export class TodoController {
   @response(200, buildSchema(CreateTodoResponseSchema))
   async create(
     @requestBody(buildSchema(CreateTodoRequestSchema))
-    payload: {
+        payload: {
       title: string;
       subtitle?: string;
       items?: {
@@ -82,11 +78,9 @@ export class TodoController {
       }[];
     }
   ) {
-    const result = await this.todoService.create(payload);
+      const result = await this.todoService.create(payload);
 
-    return {
-      result
-    }
+      return { result };
   }
 
   // 更新 Todo
@@ -95,31 +89,27 @@ export class TodoController {
   async update(
     @param.path.number('id') id: number,
     @requestBody(buildSchema(UpdateTodoRequestSchema))
-    payload: {
+        payload: {
       title?: string;
       subtitle?: string;
       status?: Exclude<TodoStatus, TodoStatus.DELETED>;
     }
   ) {
-    const result = await this.todoService.update({
-      id,
-      ...payload
-    });
+      const result = await this.todoService.update({
+          id,
+          ...payload,
+      });
 
-    return {
-      result,
-    }
+      return { result };
   }
 
   // 刪除 Todo
   @del('/{id}')
   @response(200, buildSchema(DeleteTodoResponseSchema))
   async delete(@param.path.number('id') id: number) {
-    const result = await this.todoService.deleteById(id);
+      const result = await this.todoService.deleteById(id);
 
-    return {
-      result
-    };
+      return { result };
   }
 }
 

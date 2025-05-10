@@ -1,136 +1,136 @@
 import {
-  BindingScope,
-  injectable,
+    BindingScope,
+    injectable,
 } from '@loopback/core';
 import {
-  Filter,
-  repository,
+    Filter,
+    repository,
 } from '@loopback/repository';
 import { HttpErrors } from '@loopback/rest';
 
-import { toItemDto } from '../dto/item.dto';
-import { Item } from '../models/item.model';
+import { toItemDto } from '../dto/';
+import { Item } from '../models';
 import { ItemRepository } from '../repositories';
 import { isDefined } from '../utils/common';
 
-@injectable({scope: BindingScope.TRANSIENT})
+@injectable({ scope: BindingScope.TRANSIENT })
 export class ItemService {
-  constructor(
+    constructor(
     @repository(ItemRepository)
-    private itemRepo: ItemRepository,
-  ) {}
+        private itemRepo: ItemRepository,
+    ) {}
 
-  async searchByTodoId(reqBody: {
+    async searchByTodoId(reqBody: {
       todoId: number;
       content?: string;
       isCompleted?: boolean;
       page: number;
       pageSize: number;
   }) {
-    const {
-      todoId,
-      content,
-      isCompleted,
-      page,
-      pageSize,
-    } = reqBody;
+        const {
+            todoId,
+            content,
+            isCompleted,
+            page,
+            pageSize,
+        } = reqBody;
 
-    const skip = (page) * pageSize;
+        const skip = (page) * pageSize;
 
-    const filter: Filter<Item> = {
-      where: {
-        todoId,
-        ...(
-          isDefined(content)
-            ? { content: { like: `%${content}%` } }
-            : {}
-        ),
-        ...(
-          isDefined(isCompleted)
-            ? { isCompleted }
-            : {}
-        )
-      },
-      limit: pageSize,
-      skip,
+        const filter: Filter<Item> = {
+            where: {
+                todoId,
+                ...(
+                    isDefined(content)
+                        ? { content: { like: `%${content}%` } }
+                        : {}
+                ),
+                ...(
+                    isDefined(isCompleted)
+                        ? { isCompleted }
+                        : {}
+                ),
+            },
+            limit: pageSize,
+            skip,
+        };
+
+        const res = await this.itemRepo.find(filter);
+    
+        return res.map(toItemDto);
     }
 
-    const res = await this.itemRepo.find(filter);
-    
-    return res.map(toItemDto);
-  }
+    async findById(id: number) {
+        const res = await this.itemRepo.findById(id);
 
-  async findById(id: number) {
-    const res = await this.itemRepo.findById(id);
+        return res ? toItemDto(res) : null;
+    }
 
-    return res ? toItemDto(res) : null;
-  }
-
-  async create(reqBody: {
+    async create(reqBody: {
     todoId: number;
     content: string;
     isCompleted: boolean;
   }) {
-    const {
-      todoId,
-      content,
-      isCompleted
-    } = reqBody;
+        const {
+            todoId,
+            content,
+            isCompleted,
+        } = reqBody;
 
-    const newItem = await this.itemRepo.create({
-      todoId,
-      content,
-      isCompleted,
-    });
+        const newItem = await this.itemRepo.create({
+            todoId,
+            content,
+            isCompleted,
+        });
 
-    return this.findById(newItem.id)
-  }
+        return this.findById(newItem.id);
+    }
 
-  async update(reqBody: {
+    async update(reqBody: {
       id: number;
       content?: string;
       isCompleted?: boolean;
       completedAt?: string;
   }) {
-    const {
-      id,
-      content,
-      isCompleted,
-      completedAt
-    } = reqBody
+        const {
+            id,
+            content,
+            isCompleted,
+            completedAt,
+        } = reqBody;
 
-    const findItem = await this.itemRepo.findById(id)
+        const findItem = await this.itemRepo.findById(id);
 
-    if (!findItem) {
-      throw new HttpErrors.NotFound(`Item ${id} not found`)
+        if (!findItem) {
+            throw new HttpErrors.NotFound(`Item ${id} not found`);
+        }
+
+        if (isDefined(content)) {
+            findItem.content = content;
+        }
+
+        if (isDefined(isCompleted)) {
+            findItem.isCompleted = isCompleted;
+        }
+
+        if (isDefined(completedAt)) {
+            findItem.completedAt = new Date(completedAt);
+        }
+
+        await this.itemRepo.save(findItem);
+
+        return this.findById(id);
     }
 
-    if (isDefined(content)) {
-      findItem.content = content;
-    }
+    async deleteById(id: number) {
+        const findItem = await this.itemRepo.findById(id);
 
-    if (isDefined(isCompleted)) {
-      findItem.isCompleted = isCompleted;
-    }
+        if (!findItem) {
+            throw new HttpErrors.NotFound(`Todo ${id} not found`);
+        }
 
-    if (isDefined(completedAt)) {
-      findItem.completedAt = new Date(completedAt);
-    }
-
-    await this.itemRepo.save(findItem)
-
-    return this.findById(id);
-  }
-
-  async deleteById(id: number) {
-    const findItem = await this.itemRepo.findById(id)
-
-    if (!findItem) {
-      throw new HttpErrors.NotFound(`Todo ${id} not found`)
-    }
-
-    await this.itemRepo.deleteById(id)
+        await this.itemRepo.deleteById(id);
     
-    return id;
-  }
+        return id;
+    }
 }

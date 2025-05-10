@@ -1,78 +1,70 @@
 import {
-  BindingScope,
-  injectable,
+    BindingScope,
+    injectable,
 } from '@loopback/core';
 import {
-  Filter,
-  repository,
+    Filter,
+    repository,
 } from '@loopback/repository';
 import { HttpErrors } from '@loopback/rest';
 
-import { toTodoDto } from '../dto/todo.dto';
-import {
-  Todo,
-  TodoStatus,
-} from '../models/todo.model';
+import { toTodoDto } from '../dto';
+import { TodoStatus } from '../enums';
+import { Todo } from '../models';
 import { TodoRepository } from '../repositories';
 import { isDefined } from '../utils/common';
 
-@injectable({scope: BindingScope.TRANSIENT})
+@injectable({ scope: BindingScope.TRANSIENT })
 export class TodoService {
-  constructor(
+    constructor(
     @repository(TodoRepository)
     private todoRepo: TodoRepository,
-  ) {}
+    ) {}
 
-  async list(reqBody: {
+    async list(reqBody: {
     title?: string;
     page: number;
     pageSize: number;
   }) {
-    const {
-      title,
-      page,
-      pageSize,
-    } = reqBody;
+        const {
+            title,
+            page,
+            pageSize,
+        } = reqBody;
 
-    const skip = (page) * pageSize;
+        const skip = (page) * pageSize;
 
-    const filter: Filter<Todo> = {
-      where: {
-        ...(
-          title
-            ? { title: { like: `%${title}%` } }
-            : {}
-        ),
-        deletedAt: {
-          eq: null
-        }
-      },
-      limit: pageSize,
-      skip,
-      include: [{ relation: 'items' }],
-    }
+        const filter: Filter<Todo> = {
+            where: {
+                ...(
+                    title
+                        ? { title: { like: `%${title}%` } }
+                        : {}
+                ),
+                deletedAt: { eq: null },
+            },
+            limit: pageSize,
+            skip,
+            include: [{ relation: 'items' }],
+        };
 
-    const res = await this.todoRepo.find(filter);
+        const res = await this.todoRepo.find(filter);
     
-    return res.map(toTodoDto);
-  }
-
-  async findById(id: number) {
-    const filter: Filter<Todo> = {
-      where: {
-        deletedAt: {
-          eq: null
-        }
-      },
-      include: [{ relation: 'items' }],
+        return res.map(toTodoDto);
     }
 
-    const res = await this.todoRepo.findById(id, filter);
+    async findById(id: number) {
+        const filter: Filter<Todo> = {
+            where: { deletedAt: { eq: null } },
+            include: [{ relation: 'items' }],
+        };
 
-    return res ? toTodoDto(res) : null;
-  }
+        const res = await this.todoRepo.findById(id, filter);
 
-  async create(reqBody: {
+        return res ? toTodoDto(res) : null;
+    }
+
+    async create(reqBody: {
     title: string;
     subtitle?: string;
     items?: {
@@ -80,93 +72,89 @@ export class TodoService {
       isCompleted: boolean;
     }[];
   }) {
-    const {
-      title,
-      subtitle,
-      items,
-    } = reqBody;
+        const {
+            title,
+            subtitle,
+            items,
+        } = reqBody;
 
-    const newTodo = await this.todoRepo.create({
-      title,
-      subtitle,
-      status: TodoStatus.ACTIVE,
-    });
+        const newTodo = await this.todoRepo.create({
+            title,
+            subtitle,
+            status: TodoStatus.ACTIVE,
+        });
 
-    if (items?.length) {
-      await Promise.all(
-        items?.map((item) => this.todoRepo.items(newTodo.id).create({
-            content: item.content,
-            isCompleted: item.isCompleted,
-            todoId: newTodo.id,
-        }))
-      )
+        if (items?.length) {
+            await Promise.all(
+                items?.map((item) => this.todoRepo.items(newTodo.id).create({
+                    content: item.content,
+                    isCompleted: item.isCompleted,
+                    todoId: newTodo.id,
+                }))
+            );
+        }
+
+        return this.findById(newTodo.id);
     }
 
-    return this.findById(newTodo.id)
-  }
-
-  async update(reqBody: {
+    async update(reqBody: {
       id: number;
       title?: string;
       subtitle?: string;
       status?: Exclude<TodoStatus, TodoStatus.DELETED>;
   }) {
-    const {
-      id,
-      title,
-      subtitle,
-      status
-    } = reqBody
+        const {
+            id,
+            title,
+            subtitle,
+            status,
+        } = reqBody;
 
-    const findTodo = await this.todoRepo.findOne({
-      where: {
-        id,
-        deletedAt: {
-          eq: null
+        const findTodo = await this.todoRepo.findOne({
+            where: {
+                id,
+                deletedAt: { eq: null },
+            },
+        });
+
+        if (!findTodo) {
+            throw new HttpErrors.NotFound(`Todo ${id} not found`);
         }
-      }
-    })
 
-    if (!findTodo) {
-      throw new HttpErrors.NotFound(`Todo ${id} not found`)
-    }
-
-    if (isDefined(title)) {
-      findTodo.title = title;
-    }
-
-    if (isDefined(subtitle)) {
-      findTodo.subtitle = subtitle;
-    }
-
-    if (isDefined(status)) {
-      findTodo.status = status;
-    }
-
-    await this.todoRepo.save(findTodo)
-
-    return this.findById(id);
-  }
-
-  async deleteById(id: number) {
-    const findTodo = await this.todoRepo.findOne({
-      where: {
-        id,
-        deletedAt: {
-          eq: null
+        if (isDefined(title)) {
+            findTodo.title = title;
         }
-      }
-    })
 
-    if (!findTodo) {
-      throw new HttpErrors.NotFound(`Todo ${id} not found`)
+        if (isDefined(subtitle)) {
+            findTodo.subtitle = subtitle;
+        }
+
+        if (isDefined(status)) {
+            findTodo.status = status;
+        }
+
+        await this.todoRepo.save(findTodo);
+
+        return this.findById(id);
     }
 
-    findTodo.deletedAt = new Date()
-    findTodo.status = TodoStatus.DELETED;
+    async deleteById(id: number) {
+        const findTodo = await this.todoRepo.findOne({
+            where: {
+                id,
+                deletedAt: { eq: null },
+            },
+        });
 
-    await this.todoRepo.save(findTodo)
+        if (!findTodo) {
+            throw new HttpErrors.NotFound(`Todo ${id} not found`);
+        }
 
-    return id;
-  }
+        findTodo.deletedAt = new Date();
+        findTodo.status = TodoStatus.DELETED;
+
+        await this.todoRepo.save(findTodo);
+
+        return id;
+    }
 }

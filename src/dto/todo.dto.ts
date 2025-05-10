@@ -1,60 +1,74 @@
 import {
-  model,
-  property,
+    model,
+    property,
 } from '@loopback/repository';
 
+import { TodoStatus } from '../enums';
+import { Todo } from '../models';
 import {
-  Todo,
-  TodoStatus,
-} from '../models/todo.model';
-import {
-  ItemDto,
-  toItemDto,
-} from './item.dto';
+    ItemDto,
+    toItemDto,
+} from './';
 
 @model()
 export class TodoDto {
-    @property({ type: 'number' })
-    id: number;
-
-    @property({ type: 'string' })
-    title: string;
-
-    @property({ type: 'string', nullable: true })
-    subtitle: string | null;
+    @property({
+        type: 'number',
+        description: 'Unique todo id', 
+    })
+        id: number;
 
     @property({
         type: 'string',
-        jsonSchema: {
-          enum: Object.values(TodoStatus),
-        },
+        description: 'Todo title',
     })
-    status: TodoStatus;
+        title: string;
 
-    @property({ type: 'string'})
-    created_at: string;
+    @property({
+        type: 'string',
+        nullable: true,
+        description: 'Todo subtitle',
+    })
+        subtitle: string | null;
 
-    @property({ type: 'string', nullable: true })
-    deleted_at: string | null;
+    @property({
+        type: 'string',
+        jsonSchema: { enum: Object.values(TodoStatus) },
+        description: 'Todo status',
+    })
+        status: TodoStatus;
+
+    @property({
+        type: 'string',
+        description: 'ISO 8601 datetime format', 
+    })
+        createdAt: string;
+
+    @property({
+        type: 'string',
+        nullable: true, 
+        description: 'ISO 8601 datetime format', 
+    })
+        deletedAt: string | null;
 
     @property.array(ItemDto)
-    items: ItemDto[];
+        items: ItemDto[];
 }
 
 export function toTodoDto(m: Todo): TodoDto {
-  const res: TodoDto = {
-    id: m.id,
-    title: m.title,
-    subtitle: m.subtitle,
-    status: m.status,
-    created_at: m.createdAt.toISOString(),
-    deleted_at: m.deletedAt?.toISOString() ?? null,
-    items: [],
-  }
+    const res: TodoDto = {
+        id: m.id,
+        title: m.title,
+        subtitle: m.subtitle,
+        status: m.status,
+        createdAt: m.createdAt.toISOString(),
+        deletedAt: m.deletedAt?.toISOString() ?? null,
+        items: [],
+    };
 
-  if (m.items?.length) {
-    res.items = m.items.map(toItemDto)
-  }
+    if (m.items?.length) {
+        res.items = m.items.map(toItemDto);
+    }
 
-  return res;
+    return res;
 }

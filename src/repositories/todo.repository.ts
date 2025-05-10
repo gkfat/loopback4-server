@@ -1,19 +1,19 @@
 import {
-  Getter,
-  inject,
+    Getter,
+    inject,
 } from '@loopback/core';
 import {
-  DefaultCrudRepository,
-  HasManyRepositoryFactory,
-  repository,
+    DefaultCrudRepository,
+    HasManyRepositoryFactory,
+    repository,
 } from '@loopback/repository';
 
 import { MysqlDataSource } from '../datasources/mysql.datasource';
-import { Item } from '../models/item.model';
 import {
-  Todo,
-  TodoRelations,
-} from '../models/todo.model';
+    Item,
+    Todo,
+    TodoRelations,
+} from '../models';
 import { ItemRepository } from './item.repository';
 
 export class TodoRepository extends DefaultCrudRepository<
@@ -21,20 +21,20 @@ export class TodoRepository extends DefaultCrudRepository<
   typeof Todo.prototype.id,
   TodoRelations
 > {
-  public readonly items: HasManyRepositoryFactory<Item, typeof Todo.prototype.id>;
+    public readonly items: HasManyRepositoryFactory<Item, typeof Todo.prototype.id>;
 
-  constructor(
-    @inject('datasources.mysql') dataSource: MysqlDataSource,
-    @repository.getter('ItemRepository')
-    protected itemRepositoryGetter: Getter<ItemRepository>,
-  ) {
-    super(Todo, dataSource);
+    constructor(
+        @inject('datasources.mysql') dataSource: MysqlDataSource,
+        @repository.getter('ItemRepository')
+        protected itemRepositoryGetter: Getter<ItemRepository>,
+    ) {
+        super(Todo, dataSource);
 
-    this.items = this.createHasManyRepositoryFactoryFor(
-      'items',
-      itemRepositoryGetter,
-    )
+        this.items = this.createHasManyRepositoryFactoryFor(
+            'items',
+            itemRepositoryGetter,
+        );
 
-    this.registerInclusionResolver('items', this.items.inclusionResolver)
-  }
+        this.registerInclusionResolver('items', this.items.inclusionResolver);
+    }
 }

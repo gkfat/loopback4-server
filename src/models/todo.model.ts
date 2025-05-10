@@ -1,54 +1,55 @@
 import {
-  Entity,
-  hasMany,
-  model,
-  property,
+    Entity,
+    hasMany,
+    model,
+    property,
 } from '@loopback/repository';
 
+import { TodoStatus } from '../enums';
 import { Item } from './item.model';
-
-export enum TodoStatus {
-    ACTIVE = 'ACTIVE',
-    INACTIVE = 'INACTIVE',
-    DELETED = 'DELETED',
-  }
 
 @model()
 export class Todo extends Entity {
 
     constructor(data?: Partial<Todo>) {
-      super(data);
+        super(data);
     }
 
-    @property({ type: 'number', id: true, generated: true })
-    id: number;
-
-    @property({ type: 'string', required: true })
-    title: string;
-
-    @property({ type: 'string' })
-    subtitle: string | null;
+    @property({
+        type: 'number',
+        id: true,
+        generated: true, 
+    })
+        id: number;
 
     @property({
-      type: 'string',
-      jsonSchema: {
-        enum: Object.values(TodoStatus),
-      },
-      default: TodoStatus.ACTIVE,
+        type: 'string',
+        required: true,
     })
-    status: TodoStatus;
+        title: string;
 
-    @property({type: 'date', defaultFn: 'now'})
-    createdAt: Date;
+    @property({ type: 'string' })
+        subtitle: string | null;
+
+    @property({
+        type: 'string',
+        jsonSchema: { enum: Object.values(TodoStatus) },
+        default: TodoStatus.ACTIVE,
+    })
+        status: TodoStatus;
+
+    @property({
+        type: 'date', defaultFn: 'now', 
+    })
+        createdAt: Date;
 
     // Todo is soft delete
     @property({ type: 'date' })
-    deletedAt: Date | null;
+        deletedAt: Date | null;
 
     @hasMany(() => Item)
-    items: Item[];
+        items: Item[];
 }
-
 
 export interface TodoRelations {
   items?: Item[];
