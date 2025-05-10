@@ -6,9 +6,10 @@ require engine
 
 ```shell
 nodejs >= 20
+pnpm 9.15.2
 ```
 
-run database & redis
+run database
 
 ```shell
 # for local dev
@@ -18,15 +19,7 @@ docker compose -p loopback4-app up -d
 migration
 
 ```shell
-# start the server will auto run migration
-pnpm dev
-```
-
-seed 
-
-```shell
-# will execute src/database/run-seeder.ts
-pnpm run seed
+pnpm migrate
 ```
 
 start server
