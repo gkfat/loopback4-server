@@ -37,15 +37,15 @@ export class TodoController {
     async list(
     @requestBody(buildSchema(SearchTodosRequestSchema))
         payload: {
-      title: string;
-      page?: number;
-      pageSize?: number;
-    }
+          title?: string;
+          page?: number;
+          pageSize?: number;
+        }
     ) {
         const reqBody = {
-            title: payload.title,
-            page: payload.page ?? 0,
-            pageSize: payload.pageSize ?? 10,
+            title: payload?.title,
+            page: payload?.page ?? 0,
+            pageSize: payload?.pageSize ?? 10,
         };
 
         const result = await this.todoService.list(reqBody);
@@ -70,13 +70,13 @@ export class TodoController {
   async create(
     @requestBody(buildSchema(CreateTodoRequestSchema))
         payload: {
-      title: string;
-      subtitle?: string;
-      items?: {
-        content: string;
-        isCompleted: boolean;
-      }[];
-    }
+          title: string;
+          subtitle?: string;
+          items?: {
+            content: string;
+            isCompleted: boolean;
+          }[];
+        }
   ) {
       const result = await this.todoService.create(payload);
 
@@ -90,10 +90,10 @@ export class TodoController {
     @param.path.number('id') id: number,
     @requestBody(buildSchema(UpdateTodoRequestSchema))
         payload: {
-      title?: string;
-      subtitle?: string;
-      status?: Exclude<TodoStatus, TodoStatus.DELETED>;
-    }
+          title?: string;
+          subtitle?: string;
+          status?: Exclude<TodoStatus, TodoStatus.DELETED>;
+        }
   ) {
       const result = await this.todoService.update({
           id,

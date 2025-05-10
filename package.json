@@ -12,9 +12,7 @@
     "build": "lb-tsc",
     "build:watch": "lb-tsc --watch",
     "lint": "lb-eslint .",
-    "test": "lb-mocha --allow-console-logs \"dist/__tests__\"",
-    "docker:build": "docker build -t loopback-4-app .",
-    "docker:run": "docker run -p 3000:3000 -d loopback-4-app",
+    "test": "pnpm clean && pnpm build && lb-mocha --allow-console-logs \"dist/__tests__\"",
     "migrate": "node ./dist/migrate",
     "start": "node -r source-map-support/register dist/index.js",
     "clean": "lb-clean dist *.tsbuildinfo .eslintcache"

@@ -22,6 +22,12 @@ migration
 pnpm migrate
 ```
 
+test
+
+```shell
+pnpm test
+```
+
 start server
 
 ```shell

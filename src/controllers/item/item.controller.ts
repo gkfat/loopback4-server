@@ -36,12 +36,12 @@ export class ItemController {
     async searchItemsByTodoId(
      @requestBody(buildSchema(SearchItemsByTodoRequestSchema))
          payload: {
-        todoId: number;
-        content?: string;
-        isCompleted?: boolean;
-        page?: number;
-        pageSize?: number;
-      }
+            todoId: number;
+            content?: string;
+            isCompleted?: boolean;
+            page?: number;
+            pageSize?: number;
+          }
     ) {
         const reqBody = {
             todoId: payload.todoId,
@@ -73,10 +73,10 @@ export class ItemController {
   async create(
     @requestBody(buildSchema(CreateItemRequestSchema))
         payload: {
-      todoId: number;
-      content: string;
-      isCompleted: boolean;
-    }
+          todoId: number;
+          content: string;
+          isCompleted: boolean;
+        }
   ) {
       const result = await this.itemService.create(payload);
 

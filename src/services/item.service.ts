@@ -63,7 +63,11 @@ export class ItemService {
     async findById(id: number) {
         const res = await this.itemRepo.findById(id);
 
-        return res ? toItemDto(res) : null;
+        if (!res) {
+            throw new HttpErrors.NotFound(`Item ${id} not found`);
+        }
+
+        return toItemDto(res);
     }
 
     async create(reqBody: {

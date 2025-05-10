@@ -8,11 +8,8 @@ import { Loopback4ServerApplication } from '../../boot/loopback-app';
 
 export async function setupApplication(): Promise<AppWithClient> {
     const restConfig = givenHttpServerConfig({
-    // Customize the server configuration here.
-    // Empty values (undefined, '') will be ignored by the helper.
-    //
-    // host: process.env.HOST,
-    // port: +process.env.PORT,
+        port: +(process.env.PORT ?? 3000),
+        host: process.env.HOST ?? '127.0.0.1',
     });
 
     const app = new Loopback4ServerApplication({ rest: restConfig });

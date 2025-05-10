@@ -22,10 +22,10 @@ export class TodoService {
     ) {}
 
     async list(reqBody: {
-    title?: string;
-    page: number;
-    pageSize: number;
-  }) {
+        title?: string;
+        page: number;
+        pageSize: number;
+    }) {
         const {
             title,
             page,
@@ -55,23 +55,26 @@ export class TodoService {
 
     async findById(id: number) {
         const filter: Filter<Todo> = {
-            where: { deletedAt: { eq: null } },
+            where: {
+                id,
+                deletedAt: { eq: null }, 
+            },
             include: [{ relation: 'items' }],
         };
 
-        const res = await this.todoRepo.findById(id, filter);
+        const res = await this.todoRepo.findOne(filter);
 
         return res ? toTodoDto(res) : null;
     }
 
     async create(reqBody: {
-    title: string;
-    subtitle?: string;
-    items?: {
-      content: string;
-      isCompleted: boolean;
-    }[];
-  }) {
+        title: string;
+        subtitle?: string;
+        items?: {
+        content: string;
+        isCompleted: boolean;
+        }[];
+    }) {
         const {
             title,
             subtitle,
@@ -98,11 +101,11 @@ export class TodoService {
     }
 
     async update(reqBody: {
-      id: number;
-      title?: string;
-      subtitle?: string;
-      status?: Exclude<TodoStatus, TodoStatus.DELETED>;
-  }) {
+        id: number;
+        title?: string;
+        subtitle?: string;
+        status?: Exclude<TodoStatus, TodoStatus.DELETED>;
+    }) {
         const {
             id,
             title,
